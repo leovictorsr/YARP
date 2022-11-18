@@ -1,0 +1,60 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recipe parsing example</title>
+
+<body>
+    <h5>Enter your recipe here:</h5>
+    <textarea id="recipeIn" rows="10" cols="60">1 1/4 cups cooked and pureed fresh butternut squash, or 1 10-ounce package frozen squash, defrosted
+1 cup peeled and cooked fresh chestnuts (about 20), or 1 cup canned, unsweetened chestnuts
+1 medium-size onion, peeled and chopped
+2 stalks celery, chopped coarse
+1 1/2 tablespoons vegetable oil
+2 tablespoons unflavored gelatin, dissolved in 1/2 cup water
+Salt
+1 cup canned plum tomatoes with juice
+6 cups veal or beef stock
+1/3 cup Worcestershire sauce
+</textarea><br />
+    <input id="recipeSubmit" type="submit" value="Parse" />
+    <h5>Output:</h5>
+    <textarea id="output" rows="10" , cols="60"></textarea>
+
+    <script type="text/javascript">
+        let formButton = document.getElementById("recipeSubmit");
+        formButton.addEventListener("click", function (e) {
+            let recipe = document.getElementById("recipeIn").value;
+            let output = document.getElementById("output");
+
+            let url = "http://localhost:3100/parse";
+            let args = "recipe=" + encodeURI(recipe);
+
+            // Submit an AJAX request to parse the recipe
+            let request = new XMLHttpRequest();
+            request.open('GET', url + '?' + args, true);
+            request.addEventListener('load', function () {
+                let response = JSON.parse(request.response);
+
+                if (request.status == 200) {
+                    // If the request succeeeds, print the response
+                    output.value = JSON.stringify(response["recipeParsed"]);
+                } else {
+                    // If the request fails, print the error
+                    output.value = response["message"];
+                }
+            });
+            request.addEventListener('error', function () {
+                // If the request encounters an error, print the error
+                output.value = "Request failed, please try again.";
+            });
+            request.send();
+        });
+    </script>
+</body>
+
+</html>
