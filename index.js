@@ -4,8 +4,20 @@ var app = express();
 const parseDomain = require("parse-domain");
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-const ingrparser = require("./ingr_parser");
+const parse = require('./ingr_parser/nlp_parser').parse;
 var juration = require('juration');
+
+const LANGUAGE = 'eng';
+const groupRegex = /^\w+\:/gi;
+
+const app = express();
+
+app.use(bodyParser.json());
+
+const cleanup = (i) => {
+    const cleanedIngredient = i.replace("–", "-").replace(' /', '/').toLowerCase();
+    return cleanedIngredient;
+};
 
 const domains = {
   "101cookbooks": require("./scrapers/101cookbooks"),
@@ -161,6 +173,38 @@ app.get('/parseRecipeOnCloud', async function (req, res, next) {
     });
 });
 
+app.get('/parseIngredients', (req, res) => {
+  const { ingredients } = req.body;
+  let parsedIngredients = [];
+  let group = [];
+  let currentGroup = "";
+  if (Array.isArray(ingredients)) {
+      const hasGroup = ingredients.reduce((prev, curr) => prev || curr.match(groupRegex), false);
+      for (let i of ingredients) {
+          let parsedIngredient = parse(cleanup(i), LANGUAGE);
+
+          if (!hasGroup) {
+              parsedIngredients.push(parsedIngredient);
+          }
+          else if (hasGroup && i.match(groupRegex)) {
+              currentGroup = i.match(groupRegex)[0].replace(":", "").trim();
+              if (group.length) {
+                  parsedIngredients.push(group);
+                  group = [];
+              }
+          }
+          else if (hasGroup) {
+              parsedIngredient.group = currentGroup;
+              group.push(parsedIngredient);
+          }
+      }
+
+      if (group.length) parsedIngredients.push(group);
+  }
+
+  res.send(parsedIngredients);
+});
+
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -173,5 +217,5 @@ function getFirstNumber(string) {
 }
 
 app.listen(3101, function () {
-  console.log('Recipe Parser app started on port 3101')
+  console.log('Recipe and Ingredient Parser app started on port 3101')
 });
