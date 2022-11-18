@@ -11,14 +11,7 @@ const allRecipes = url => {
       request(url, (error, response, html) => {
         if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
-          // Check if recipe is in new format
-          if ((Recipe.name = $(".intro").text())) {
-            newAllRecipes($, Recipe);
-          } else if ((Recipe.name = $("#recipe-main-content").text())) {
-            oldAllRecipes($, Recipe);
-          } else {
-            reject(new Error("No recipe found on page"));
-          }
+          parseRecipe($, Recipe);
           resolve(Recipe);
         } else {
           reject(new Error("No recipe found on page"));
@@ -28,33 +21,30 @@ const allRecipes = url => {
   });
 };
 
-const newAllRecipes = ($, Recipe) => {
+const parseRecipe = ($, Recipe) => {
+  Recipe.name = $("meta[property='og:title']").attr("content");
   Recipe.image = $("meta[property='og:image']").attr("content");
-  Recipe.name = Recipe.name.replace(/\s\s+/g, "");
 
-  $(".recipe-meta-item").each((i, el) => {
+  $(".mntl-recipe-details__item").each((i, el) => {
     const title = $(el)
-      .children(".recipe-meta-item-header")
+      .children(".mntl-recipe-details__label")
       .text()
       .replace(/\s*:|\s+(?=\s*)/g, "");
     const value = $(el)
-      .children(".recipe-meta-item-body")
+      .children(".mntl-recipe-details__value")
       .text()
       .replace(/\s\s+/g, "");
     switch (title) {
-      case "prep":
+      case "PrepTime":
         Recipe.time.prep = value;
         break;
-      case "cook":
+      case "CookTime":
         Recipe.time.cook = value;
         break;
-      case "total":
+      case "TotalTime":
         Recipe.time.total = value;
         break;
-      case "additional":
-        Recipe.time.inactive = value;
-        break;
-      case "Servings":
+      case "Yield":
         Recipe.servings = value;
         break;
       default:
@@ -62,43 +52,18 @@ const newAllRecipes = ($, Recipe) => {
     }
   });
 
-  $(".ingredients-item").each((i, el) => {
+  $("li.mntl-structured-ingredients__list-item ").each((i, el) => {
     const ingredient = $(el)
       .text()
       .replace(/\s\s+/g, " ")
       .trim();
     Recipe.ingredients.push(ingredient);
   });
-  $($(".instructions-section-item").find("p")).each((i, el) => {
-    const instruction = $(el).text();
+
+  $($("div.recipe__steps-content").find("li")).each((i, el) => {
+    const instruction = $(el).find("p").text().replace(/\n/g, "");
     Recipe.instructions.push(instruction);
   });
-};
-
-const oldAllRecipes = ($, Recipe) => {
-  Recipe.image = $("meta[property='og:image']").attr("content");
-
-  $("#polaris-app label").each((i, el) => {
-    const item = $(el)
-      .text()
-      .replace(/\s\s+/g, "");
-    if (item != "Add all ingredients to list" && item != "") {
-      Recipe.ingredients.push(item);
-    }
-  });
-
-  $(".step").each((i, el) => {
-    const step = $(el)
-      .text()
-      .replace(/\s\s+/g, "");
-    if (step != "") {
-      Recipe.instructions.push(step);
-    }
-  });
-  Recipe.time.prep = $("time[itemprop=prepTime]").text();
-  Recipe.time.cook = $("time[itemprop=cookTime]").text();
-  Recipe.time.ready = $("time[itemprop=totalTime]").text();
-  Recipe.servings = $("#metaRecipeServings").attr("content");
 };
 
 module.exports = allRecipes;
