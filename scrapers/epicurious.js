@@ -19,12 +19,10 @@ const epicurious = url => {
             Recipe.ingredients.push($(el).text());
           });
 
-          $("div[class*='InstructionBody']").each((i, el) => {
-            Recipe.instructions.push(
-              $(el).first().first()
-                .text()
-                .replace(/\s\s+/g, "")
-            );
+          $("li[class*='InstructionListWrapper']").each((i, el) => {
+            $(el).find("p").each((i, el) => {
+              Recipe.instructions.push($(el).text().replace(/\s\s+/g, ""))
+            })
           });
 
           $("li[class*='InfoSliceListItem']").each((i, el) => {
@@ -34,6 +32,8 @@ const epicurious = url => {
           });
 
           Recipe.servings = $("dd.yield").text();
+
+          console.log(Recipe)
 
           if (
             !Recipe.name ||
@@ -51,5 +51,7 @@ const epicurious = url => {
     }
   });
 };
+
+epicurious("https://www.epicurious.com/recipes/food/views/spatchcocked-turkey").then(recipe => console.log(recipe))
 
 module.exports = epicurious;
