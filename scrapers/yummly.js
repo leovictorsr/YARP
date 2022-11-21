@@ -74,7 +74,7 @@ const customPuppeteerFetch = async url => {
         return html;
       }
     } else {
-      await brower.close();
+      await browser.close();
       return Promise.reject(response._status);
     }
   } catch (e) {
@@ -93,8 +93,8 @@ const yummly = url => {
         const Recipe = new RecipeSchema();
         const $ = cheerio.load(html);
 
+        Recipe.name = $("meta[property='og:title']").attr("content");
         Recipe.image = $("meta[property='og:image']").attr("content");
-        Recipe.name = $(".recipe-title").text();
 
         $(".IngredientLine").each((i, el) => {
           Recipe.ingredients.push($(el).text());
@@ -117,6 +117,8 @@ const yummly = url => {
 
         Recipe.servings = $(".servings").text().toLowerCase();
 
+        console.log(Recipe)
+
         if (!Recipe.name || !Recipe.ingredients.length) {
           reject(new Error("No recipe found on page"));
         } else {
@@ -128,5 +130,7 @@ const yummly = url => {
     }
   });
 };
+
+yummly("https://www.yummly.com/recipe/Ground-Beef-Dirty-Rice-1019203").then(recipe => console.log(recipe))
 
 module.exports = yummly;
