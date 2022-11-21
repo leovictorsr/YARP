@@ -1,4 +1,7 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-extra");
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const randomUseragent = require('random-useragent');
+puppeteer.use(StealthPlugin());
 
 const blockedResourceTypes = [
   "image",
@@ -36,6 +39,7 @@ const skippedResources = [
 ];
 
 const puppeteerFetch = async url => {
+  const userAgent = randomUseragent.getRandom();
   const args = [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -43,17 +47,18 @@ const puppeteerFetch = async url => {
     '--window-position=0,0',
     '--ignore-certifcate-errors',
     '--ignore-certifcate-errors-spki-list',
-    '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"'
-];
-const options = {
+    `--user-agent=${userAgent}`
+  ];
+  const options = {
     args,
-    headless: true,
+    headless: false,
     ignoreHTTPSErrors: true,
     userDataDir: './tmp'
-};
+  };
+  
   const browser = await puppeteer.launch(options);
 
-  const page = await browser.newPage();
+  const page = (await browser.pages())[0];
   await page.setRequestInterception(true);
 
   await page.on("request", req => {
@@ -69,6 +74,8 @@ const options = {
   });
 
   const response = await page.goto(url);
+
+  console.log(response)
 
   if (response._status < 400) {
     let html = await page.content();
