@@ -40,71 +40,75 @@ function getPreposition(input, language) {
 }
 
 function parse(recipeString, language) {
-  const ingredientLine = recipeString.trim(); // removes leading and trailing whitespace
-
-  /* restOfIngredient represents rest of ingredient line.
-  For example: "1 pinch salt" --> quantity: 1, restOfIngredient: pinch salt */
-  let [quantity, restOfIngredient] = convert.findQuantityAndConvertIfUnicode(ingredientLine, language);
-
-  quantity = quantity ? quantity : '1';
-  let minQty = quantity; // default to quantity
-  let maxQty = quantity; // default to quantity
-
-  // if quantity is non-nil and is a range, for ex: "1-2", we want to get minQty and maxQty
-  if (quantity && quantity.includes('-')) {
-    [minQty, maxQty] = quantity.split('-');
+  try {
+    const ingredientLine = recipeString.trim(); // removes leading and trailing whitespace
+  
+    /* restOfIngredient represents rest of ingredient line.
+    For example: "1 pinch salt" --> quantity: 1, restOfIngredient: pinch salt */
+    let [quantity, restOfIngredient] = convert.findQuantityAndConvertIfUnicode(ingredientLine, language);
+  
+    quantity = quantity ? quantity : '1';
+    let minQty = quantity; // default to quantity
+    let maxQty = quantity; // default to quantity
+  
+    // if quantity is non-nil and is a range, for ex: "1-2", we want to get minQty and maxQty
+    if (quantity && quantity.includes('-')) {
+      [minQty, maxQty] = quantity.split('-');
+    }
+    minQty = convert.convertFromFraction(minQty);
+    maxQty = convert.convertFromFraction(maxQty);
+    quantity = convert.convertFromFraction(minQty);
+  
+    /* extraInfo will be any info in parantheses. We'll place it at the end of the ingredient.
+    For example: "sugar (or other sweetener)" --> extraInfo: "(or other sweetener)" */
+    let extraInfo;
+    restOfIngredient = restOfIngredient.replace(/^\s*-/, ' ').trim();
+    restOfIngredient = restOfIngredient.replace('+', '').trim();
+    restOfIngredient = restOfIngredient.replace(/\s\s/gi, '').trim();
+  
+    let commaNote = restOfIngredient.split(',');
+    restOfIngredient = commaNote.shift();
+    commaNote = commaNote.join(',').trim();
+  
+    if (restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)/g)) {
+      extraInfo = restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)|\/\s+([\w+]+)\s+([\w+]+)/g);
+      extraInfo = extraInfo.filter(i => i.includes("(") || i.includes("/"));
+      extraInfo.map(ei => restOfIngredient = restOfIngredient.replace(ei, '').trim());
+      restOfIngredient = restOfIngredient.replace('   ', ' ').trim();
+    }
+    if (commaNote) extraInfo.push(commaNote);
+  
+    // grab unit and turn it into non-plural version, for ex: "Tablespoons" OR "Tsbp." --> "tablespoon"
+    let [unit, shorthand] = getUnit(restOfIngredient, language);
+    // remove unit from the ingredient if one was found and trim leading and trailing whitespace
+  
+    let ingredient = restOfIngredient.replace(unit, '').trim();
+    const shorthandRegex = new RegExp(`${shorthand}`, 'gi');
+    ingredient = restOfIngredient.replace(shorthandRegex, '').trim();
+    ingredient = ingredient.split('.').join("").trim();
+    let preposition = getPreposition(ingredient.split(' ')[0], language);
+  
+    if (preposition) {
+      let regex = new RegExp('^' + preposition)
+      ingredient = ingredient.replace(regex, '').trim()
+    }
+    if (!unit) {
+      unit = 'ea.'
+    }
+    ingredient = ingredient.replace(/\s\s/gi, ' ');
+    ingredient = ingredient.charAt(0).toUpperCase() + ingredient.slice(1);
+    return {
+      quantity: quantity ? quantity : undefined,
+      unit: unit,
+      ingredient: ingredient,
+      note: extraInfo.length ? extraInfo : undefined,
+      minQty: +minQty,
+      maxQty: +maxQty,
+      original: ingredientLine
+    };
+  } catch (e) {
+    console.log(e)
   }
-  minQty = convert.convertFromFraction(minQty);
-  maxQty = convert.convertFromFraction(maxQty);
-  quantity = convert.convertFromFraction(minQty);
-
-  /* extraInfo will be any info in parantheses. We'll place it at the end of the ingredient.
-  For example: "sugar (or other sweetener)" --> extraInfo: "(or other sweetener)" */
-  let extraInfo;
-  restOfIngredient = restOfIngredient.replace(/^\s*-/, ' ').trim();
-  restOfIngredient = restOfIngredient.replace('+', '').trim();
-  restOfIngredient = restOfIngredient.replace(/\s\s/gi, '').trim();
-
-  let commaNote = restOfIngredient.split(',');
-  restOfIngredient = commaNote.shift();
-  commaNote = commaNote.join(',').trim();
-
-  if (restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)/g)) {
-    extraInfo = restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)|\/\s+([\w+]+)\s+([\w+]+)/g);
-    extraInfo = extraInfo.filter(i => i.includes("(") || i.includes("/"));
-    extraInfo.map(ei => restOfIngredient = restOfIngredient.replace(ei, '').trim());
-    restOfIngredient = restOfIngredient.replace('   ', ' ').trim();
-  }
-  if (commaNote) extraInfo.push(commaNote);
-
-  // grab unit and turn it into non-plural version, for ex: "Tablespoons" OR "Tsbp." --> "tablespoon"
-  let [unit, shorthand] = getUnit(restOfIngredient, language);
-  // remove unit from the ingredient if one was found and trim leading and trailing whitespace
-
-  let ingredient = restOfIngredient.replace(unit, '').trim();
-  const shorthandRegex = new RegExp(`${shorthand}`, 'gi');
-  ingredient = restOfIngredient.replace(shorthandRegex, '').trim();
-  ingredient = ingredient.split('.').join("").trim();
-  let preposition = getPreposition(ingredient.split(' ')[0], language);
-
-  if (preposition) {
-    let regex = new RegExp('^' + preposition)
-    ingredient = ingredient.replace(regex, '').trim()
-  }
-  if (!unit) {
-    unit = 'ea.'
-  }
-  ingredient = ingredient.replace(/\s\s/gi, ' ');
-  ingredient = ingredient.charAt(0).toUpperCase() + ingredient.slice(1);
-  return {
-    quantity: quantity ? quantity : undefined,
-    unit: unit,
-    ingredient: ingredient,
-    note: extraInfo.length ? extraInfo : undefined,
-    minQty: +minQty,
-    maxQty: +maxQty,
-    original: ingredientLine
-  };
 }
 
 function combine(ingredientArray) {

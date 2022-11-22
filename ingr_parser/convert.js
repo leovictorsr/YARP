@@ -92,6 +92,8 @@ function findQuantityAndConvertIfUnicode(ingredientLine, language) {
     const onlyUnicodeFraction = /[^\u0000-\u007F]+/g;
     const wordUntilSpace = /^\w+\s/g;
 
+    for (let i in unicodeObj) ingredientLine = ingredientLine.replace(i, unicodeObj[i])
+
     // found a unicode quantity inside our regex, for ex: '⅝'
     if (ingredientLine.match(unicodeFractionRegex)) {
         const numericPart = getFirstMatch(ingredientLine, unicodeFractionRegex);

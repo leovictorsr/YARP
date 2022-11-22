@@ -112,8 +112,8 @@ app.get('/parseRecipeOnCloud', async function (req, res, next) {
     .then(recipe => {
       console.log("\nRecipe Scraped, JSON is :%j", recipe);
       recipe.url = url;
-      const ingrParserResult = recipe.ingredients.map((v, i) => parse_ingredient(v));
-      const parsedIngredients = [];
+      const ingrParserResult = recipe.ingredients.map((v, i) => parse_ingredient(v, LANGUAGE));
+      let parsedIngredients = [];
       for (i = 0; i < ingrParserResult.length; i++) {
         const ingredient = ingrParserResult[i];
         parsedIngredients.push(ingredient);
