@@ -14,9 +14,9 @@ const foodAndWine = url => {
           const $ = cheerio.load(html);
 
           Recipe.image = $("meta[property='og:image']").attr("content");
-          Recipe.name = $("h1.headline").text();
+          Recipe.name = $("meta[property='og:title']").attr("content");
 
-          $(".ingredients-item-name")
+          $("li.mntl-structured-ingredients__list-item")
             .each((i, el) => {
               Recipe.ingredients.push(
                 $(el)
@@ -25,27 +25,17 @@ const foodAndWine = url => {
               );
             });
 
-          $(".recipe-instructions")
-            .find("p")
+          $("div.recipe__steps-content")
+            .find("li")
             .each((i, el) => {
-              Recipe.instructions.push($(el).text());
+              Recipe.instructions.push($(el).text().trim().replace(/\n\n/, ""));
             });
 
-          let metaBody = $(".recipe-meta-item-body");
-
-          Recipe.time.active = metaBody
-            .first()
-            .text()
-            .trim();
-          Recipe.time.total = $(metaBody.get(1))
-            .text()
-            .trim();
-
-          let servings = metaBody
-            .last()
-            .text()
-            .trim();
-          Recipe.servings = servings.slice(servings.indexOf(":") + 2);
+          $("div.mntl-recipe-details__item").each((i, el) => {
+            if (i == 0) Recipe.time.active = $(el).find(".mntl-recipe-details__value").text();
+            if (i == 1) Recipe.time.total = $(el).find(".mntl-recipe-details__value").text();
+            if (i == 2) Recipe.servings = $(el).find(".mntl-recipe-details__value").text();
+          });
 
           if (
             !Recipe.name ||

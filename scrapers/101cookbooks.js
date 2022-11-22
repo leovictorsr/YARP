@@ -17,7 +17,7 @@ const oneHundredAndOne = url => {
           Recipe.image = $("meta[property='og:image']").attr("content");
           Recipe.name = body.children("h2").text();
 
-          $(".wprm-recipe-ingredient").each((i, el) => {
+          $("li[class$='recipe-ingredient']").each((i, el) => {
             Recipe.ingredients.push(
               $(el)
                 .text()
@@ -26,29 +26,23 @@ const oneHundredAndOne = url => {
             );
           });
 
-          $(".wprm-recipe-instruction-group").each((i, el) => {
+          $("li[class$='recipe-instruction']").each((i, el) => {
             Recipe.instructions.push(
               $(el)
-                .children(".wprm-recipe-group-name")
                 .text()
+                .replace(/\s\s+/g, " ")
+                .trim()
             );
-            $(el)
-              .find(".wprm-recipe-instruction-text")
-              .each((i, elChild) => {
-                Recipe.instructions.push($(elChild).text());
-              });
           });
 
-          Recipe.time.prep = $($(".wprm-recipe-time").get(1)).text();
-          Recipe.time.total = $(".wprm-recipe-time")
-            .last()
-            .text();
+          Recipe.servings = $("div[class$='recipe-notes-container']").find("p").text().trim();
 
-          Recipe.servings = $(".wprm-recipe-time")
-            .first()
-            .text()
-            .trim();
-
+          $("div[class$='recipe-time']").each((i, el) => {
+             if (i == 0) Recipe.time.prep = $(el).text().trim()
+             if (i == 1) Recipe.time.cook = $(el).text().trim()
+             if (i == 2) Recipe.time.total = $(el).text().trim()
+          });
+        
           if (
             !Recipe.name ||
             !Recipe.ingredients.length ||

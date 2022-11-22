@@ -52,6 +52,4 @@ const epicurious = url => {
   });
 };
 
-epicurious("https://www.epicurious.com/recipes/food/views/spatchcocked-turkey").then(recipe => console.log(recipe))
-
 module.exports = epicurious;

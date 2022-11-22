@@ -23,13 +23,12 @@ const bonAppetit = url => {
             Recipe.ingredients[i] = `${$(el).text()} ${Recipe.ingredients[i]}`;
           });
 
-          $("div[class*='InstructionBody']").each((i, el) => {
-            Recipe.instructions.push(
-              $(el).first().first()
-                .text()
-                .replace(/\s\s+/g, "")
-            );
+          $("li[class*='InstructionListWrapper']").each((i, el) => {
+            $(el).find("p").each((i, el) => {
+              Recipe.instructions.push($(el).text().replace(/\s\s+/g, ""))
+            })
           });
+
 
           Recipe.servings = $("p[class*='Yield']").text();
 

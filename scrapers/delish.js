@@ -14,43 +14,28 @@ const delish = url => {
           const $ = cheerio.load(html);
 
           Recipe.image = $("meta[property='og:image']").attr("content");
-          Recipe.name = $("meta[property='og:title']").attr("content");
+          Recipe.name = $("header").find("h1").text();
 
-          $(".ingredient-item")
+          $("ul.ingredient-lists").find("li")
             .each((i, el) => {
-              let quantity = $(el).find('.ingredient-amount').text().trim();
-              quantity = quantity.replace(/\s\s+/g, " ")
-              let description = $(el).find('.ingredient-description').text().trim();
-              description = description.replace(/\s\s+/g, " ")
-
-              Recipe.ingredients.push(`${quantity} ${description}`);
+              Recipe.ingredients.push($(el).text());
             })
 
-          $(".direction-lists")
+          $("ul.directions")
+            .find("ol")
             .find("li")
             .each((i, el) => {
-              Recipe.instructions.push($(el).text().trim());
+              var $instruction = $(el).contents().filter(function() {
+                return this.nodeType === 3;
+              });
+              Recipe.instructions.push($instruction.text().trim().replace(/\n/, ""));
             })
 
-          let servings = $(".yields-amount").text();
-          if (servings) {
-            Recipe.servings = servings.toLowerCase().replace(/\s\s+/g, " ").trim();
-          }
-
-          let prepTime = $(".prep-time-amount").first().text()
-          if (prepTime) {
-            Recipe.time.prep = prepTime.replace(/\s\s+/g, " ").trim();
-          }
-
-          let cookTime = $(".cook-time-amount").first().text()
-          if (cookTime) {
-            Recipe.time.cook = cookTime.replace(/\s\s+/g, " ").trim();
-          }
-
-          let totalTime = $(".total-time-amount").first().text()
-          if (totalTime) {
-            Recipe.time.total = totalTime.replace(/\s\s+/g, " ").trim();
-          }
+          $("dd").each((i, el) => {
+            if (i == 0) Recipe.servings = $(el).find("span").text();
+            if (i == 1) Recipe.time.prep = $(el).text().trim();
+            if (i == 2) Recipe.time.total = $(el).text().trim();
+          })
 
           if (
             !Recipe.name ||
@@ -68,7 +53,5 @@ const delish = url => {
     }
   });
 };
-
-delish("https://www.delish.com/cooking/recipe-ideas/a29786303/risotto-rice-recipe/");
 
 module.exports = delish;

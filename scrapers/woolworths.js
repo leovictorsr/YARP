@@ -13,7 +13,7 @@ const woolworths = url => {
         const $ = cheerio.load(html);
 
         Recipe.image = $("meta[property='og:image']").attr("content");
-        Recipe.name = $("meta[property='og:title']").attr("content").split("|")[0].trim();
+        Recipe.name = $("h1").first().text().trim();
 
         $("div.ingredient-list").each((i, el) => {
           Recipe.ingredients.push(
@@ -37,7 +37,6 @@ const woolworths = url => {
           else if (i == 2) Recipe.servings = $(el).text().trim()
         });
 
-        console.log(Recipe);
         if (
           !Recipe.name ||
           !Recipe.ingredients.length ||

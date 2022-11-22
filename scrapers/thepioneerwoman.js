@@ -18,11 +18,11 @@ const thePioneerWoman = url => {
           const $ = cheerio.load(html);
 
           Recipe.image = $("meta[property='og:image']").attr("content");
-          Recipe.name = $(".recipe-hed")
+          Recipe.name = $("h1")
             .first()
             .text();
 
-          $(".ingredient-item").each((i, el) => {
+          $("ul.ingredient-lists").find("li").each((i, el) => {
             Recipe.ingredients.push(
               $(el)
                 .text()
@@ -31,47 +31,22 @@ const thePioneerWoman = url => {
             );
           });
 
-          $(".direction-lists")
+          $("ul.directions")
             .find("li")
-            .each((i, el) => {
-              if (el.type === "text") {
-                Recipe.instructions.push(
-                  $(el)
-                    .text()
-                    .trim()
-                );
-              }
-            });
-          if (!Recipe.instructions.length) {
-            let directions = $(".direction-lists")
-              .contents()
-              .each((i, el) => {
-                if (el.type === "text") {
-                  Recipe.instructions.push(
-                    $(el)
-                      .text()
-                      .trim()
-                  );
-                }
-              });
-          }
+            .contents()
+            .filter(function () {
+              return this.type === "text"
+            })
+            .each((i, el) => Recipe.instructions.push($(el).text().trim()))
 
-          Recipe.time.prep = $(".prep-time-amount")
-            .text()
-            .replace(/\s\s+/g, " ")
-            .trim();
-          Recipe.time.cook = $(".cook-time-amount")
-            .text()
-            .replace(/\s\s+/g, " ")
-            .trim();
-          Recipe.time.total = $(".total-time-amount")
-            .text()
-            .replace(/\s\s+/g, " ")
-            .trim();
-          Recipe.servings = $(".yields-amount")
-            .text()
-            .replace(/\s\s+/g, " ")
-            .trim();
+          $("dd")
+            .each((i, el) => {
+              if (i == 0) Recipe.servings = $(el).find("span").text().trim();
+              if (i == 1) Recipe.time.prep = $(el).text().trim();
+              if (i == 2) Recipe.time.cook = $(el).text().trim();
+              if (i == 3) Recipe.time.total = $(el).text().trim();
+            });
+
           if (
             !Recipe.name ||
             !Recipe.ingredients.length ||

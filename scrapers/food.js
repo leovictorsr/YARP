@@ -14,9 +14,9 @@ const food = url => {
           const $ = cheerio.load(html);
 
           Recipe.image = $("meta[name='og:image']").attr("content");
-          Recipe.name = $(".recipe-title").text();
+          Recipe.name = $("h1").first().text();
 
-          $(".recipe-ingredients__item").each((i, el) => {
+          $("ul.ingredient-list").find("li").each((i, el) => {
             const item = $(el)
               .text()
               .replace(/\s\s+/g, " ")
@@ -24,22 +24,17 @@ const food = url => {
             Recipe.ingredients.push(item);
           });
 
-          $(".recipe-directions__step").each((i, el) => {
+          $("ul.direction-list").find("li").each((i, el) => {
             const step = $(el)
               .text()
               .replace(/\s\s+/g, "");
             Recipe.instructions.push(step);
           });
 
-          Recipe.time.total = $(".recipe-facts__time")
-            .children()
-            .last()
-            .text();
-
-          Recipe.servings = $(".recipe-facts__servings")
-            .find("a")
-            .first()
-            .text();
+          $("dd").each((i, el) => {
+            if (i == 0) Recipe.time.total = $(el).text().trim();
+            if (i == 2) Recipe.servings = $(el).find("span").text();
+          })
 
           if (
             !Recipe.name ||

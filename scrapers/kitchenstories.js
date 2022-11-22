@@ -20,50 +20,29 @@ const kitchenStories = url => {
         const $ = cheerio.load(html);
 
         Recipe.image = $("meta[property='og:image']").attr("content");
-        Recipe.name = $(".recipe-title").text();
+        Recipe.name = $("h1").first().text();
 
-        $(".ingredients")
-          .find("tr")
+        $("div[data-test='recipe-ingredients-item']")
           .each((i, el) => {
-            Recipe.ingredients.push($(el).text());
+            Recipe.ingredients.push(`${$(el).children().first().text()} ${$(el).children().last().text()}`.trim().replace(/\s\s/, " "));
           });
 
-        $(".step")
-          .children(".text")
+        $("li[data-test='recipe-steps-item']")
+          .find("p")
           .each((i, el) => {
             Recipe.instructions.push($(el).text());
           });
 
-        $(".time-cell").each((i, el) => {
-          let title = $(el)
-            .children(".title")
-            .text();
-          let time = $(el)
-            .find(".time")
-            .text();
-          let unit = $(el)
-            .find(".unit")
-            .text();
-          if (parseInt(time)) {
-            switch (title) {
-              case "Preparation":
-              case "Zubereitung":
-                Recipe.time.prep = `${time} ${unit}`;
-                break;
-              case "Baking":
-              case "Backzeit":
-                Recipe.time.cook = `${time} ${unit}`;
-                break;
-              case "Resting":
-              case "Ruhezeit":
-                Recipe.time.inactive = `${time} ${unit}`;
-                break;
-              default:
-            }
-          }
-        });
+        $("section[data-test='recipe-difficulty']")
+          .find("div")
+          .each((i, el) => {
+            if (i == 1) Recipe.time.prep = $(el).find("div").text();
+            if (i == 2) Recipe.time.cook = $(el).find("div").text();
+            if (i == 3) Recipe.time.inactive = $(el).find("div").text();
+          });
 
-        Recipe.servings = $(".stepper-value").text();
+        Recipe.servings = $("span[data-test='recipe-ingredients-servings-count']").text();
+
         if (
           !Recipe.name ||
           !Recipe.ingredients.length ||
@@ -79,7 +58,5 @@ const kitchenStories = url => {
     }
   });
 };
-
-kitchenStories('https://www.kitchenstories.com/en/recipes/pasta-al-limone').then(recipe => console.log(recipe))
 
 module.exports = kitchenStories;

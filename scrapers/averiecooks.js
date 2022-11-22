@@ -47,8 +47,6 @@ const averieCooks = url => {
       }
     }
   });
-};;
-
-averieCooks("https://www.averiecooks.com/chicken-pad-thai").then(Recipe => console.log(Recipe));
+};
 
 module.exports = averieCooks;

@@ -15,21 +15,21 @@ const weightWatchers = url => {
           Recipe.image = $("meta[property='og:image']").attr("content");
           Recipe.name = $("meta[property='og:title']").attr("content").split("|")[0].trim();
 
-          $("p[class*='IngredientItem_ingredient__name']").each((i, el) => {
+          $("p[class*='IngredientItem_ingredientName']").each((i, el) => {
             Recipe.ingredients.push($(el).text());
           });
 
-          $("p[class*='IngredientItem_ingredient__description']").each((i, el) => {
+          $("p[class*='IngredientItem_ingredientDescription']").each((i, el) => {
             Recipe.ingredients[i] = `${$(el).text()}${Recipe.ingredients[i]}`;
           });
 
-          $("li[class*='InstructionsFood_list-item']").each((i, el) => {
+          $("li[class*='InstructionsFood_listItem']").each((i, el) => {
             Recipe.instructions.push(
               $(el).text().replace(/\s\s+/g, "")
             );
           });
 
-          $("div[class*='AttributeItem_wrapper']")
+          $("div[class*='AttributeItem_attributeItem']")
             .each((i, el) => {
               const label = $(el).children("div[class*='AttributeItem_label']").first().text();
               const info = $(el).children("div[class*='AttributeItem_value']").first().text();

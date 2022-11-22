@@ -16,21 +16,21 @@ const simplyRecipes = url => {
           const $ = cheerio.load(html);
 
           Recipe.image = $("meta[property='og:image']").attr("content");
-          Recipe.name = $("meta[itemprop='name']").attr("content");
+          Recipe.name = $("meta[property='og:title']").attr("content");
 
-          $(".ingredient-list")
-            .find("li.ingredient, p")
-            .each((i, el) => {
-              Recipe.ingredients.push($(el).text().trim());
-            });
+          $("li.structured-ingredients__list-item").each((i, el) => {
+            Recipe.ingredients.push($(el).text().trim());
+          });
 
-          $(".comp.mntl-sc-block-group--OL.mntl-sc-block.mntl-sc-block-startgroup")
+          $("section.section--instructions")
             .find("li")
             .each((i, el) => {
-              let curEl = $(el).text().trim();
-              if (curEl) {
-                Recipe.instructions.push(curEl.replace(/\r?\n|\r/g, "").replace(/\s\s/, " ").replace("Vivian Jao", "").trim());
-              }
+              $(el).find("p").each((i, curEl) => {
+                if (!$(curEl).parent().hasClass("figure-article-caption-owner")
+                    && !$(curEl).text().includes("Did you love this recipe?")) {
+                  Recipe.instructions.push($(curEl).text().replace(/\r?\n|\r/g, "").replace(/\s\s/, " ").trim());
+                }
+              });
             });
 
           $(".project-meta__times-container")
@@ -47,7 +47,7 @@ const simplyRecipes = url => {
                 Recipe.time.total = info;
               }
             });
-          Recipe.servings = $(".loc.recipe-serving.project-meta__recipe-serving").find(".meta-text__data").text();
+          Recipe.servings = $("div.project-meta__recipe-serving").find(".meta-text__data").text().trim().replace(/\n/, " ");
 
           if (
             !Recipe.name ||

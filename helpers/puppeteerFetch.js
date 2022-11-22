@@ -75,8 +75,6 @@ const puppeteerFetch = async url => {
 
   const response = await page.goto(url);
 
-  console.log(response)
-
   if (response._status < 400) {
     let html = await page.content();
     try {
