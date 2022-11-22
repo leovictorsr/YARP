@@ -4,15 +4,11 @@ var app = express();
 const parseDomain = require("parse-domain");
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-const parse = require('./ingr_parser/nlp_parser').parse;
+const parse_ingredient = require('./ingr_parser/nlp_parser').parse;
 var juration = require('juration');
 
 const LANGUAGE = 'eng';
 const groupRegex = /^\w+\:/gi;
-
-const app = express();
-
-app.use(bodyParser.json());
 
 const cleanup = (i) => {
     const cleanedIngredient = i.replace("–", "-").replace(' /', '/').toLowerCase();
@@ -116,7 +112,7 @@ app.get('/parseRecipeOnCloud', async function (req, res, next) {
     .then(recipe => {
       console.log("\nRecipe Scraped, JSON is :%j", recipe);
       recipe.url = url;
-      const ingrParserResult =  ingrparser(recipe.ingredients);
+      const ingrParserResult = recipe.ingredients.map((v, i) => parse_ingredient(v));
       const parsedIngredients = [];
       for (i = 0; i < ingrParserResult.length; i++) {
         const ingredient = ingrParserResult[i];
@@ -181,7 +177,7 @@ app.get('/parseIngredients', (req, res) => {
   if (Array.isArray(ingredients)) {
       const hasGroup = ingredients.reduce((prev, curr) => prev || curr.match(groupRegex), false);
       for (let i of ingredients) {
-          let parsedIngredient = parse(cleanup(i), LANGUAGE);
+          let parsedIngredient = parse_ingredient(cleanup(i), LANGUAGE);
 
           if (!hasGroup) {
               parsedIngredients.push(parsedIngredient);

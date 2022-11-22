@@ -65,6 +65,4 @@ const sallysbakingaddiction = url => {
   });
 };
 
-sallysbakingaddiction("https://sallysbakingaddiction.com/strawberry-biscuit-cookies/");
-
 module.exports = sallysbakingaddiction;
