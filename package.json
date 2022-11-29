@@ -38,7 +38,7 @@
     "fraction.js": "4.0.12",
     "juration": "https://github.com/framp/juration.git",
     "node-gzip": "1.1.2",
-    "nodemon": "^2.0.15",
+    "nodemon": "^2.0.20",
     "parse-domain": "^2.3.2",
     "puppeteer": "^1.20.0",
     "puppeteer-extra": "^3.3.4",

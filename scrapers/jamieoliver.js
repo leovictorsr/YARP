@@ -35,12 +35,12 @@ const jamieoliver = url => {
 
           let prepTime = $(".recipe-detail.time").first().text()
           if (prepTime) {
-            Recipe.time.prep = prepTime.toLowerCase().replace(/\s\s+/g, " ").replace('cooks in', '').trim();
+            Recipe.time.prep = prepTime.toLowerCase().replace(/\s\s+/g, " ").replace('cooks in', '').replace("time", "").trim();
           }
 
           let totalTime = $(".recipe-detail.time").first().text()
           if (totalTime) {
-            Recipe.time.total = totalTime.toLowerCase().replace(/\s\s+/g, " ").replace('cooks in', '').trim();
+            Recipe.time.total = totalTime.toLowerCase().replace(/\s\s+/g, " ").replace('cooks in', '').replace("time", "").trim();
           }
 
           if (

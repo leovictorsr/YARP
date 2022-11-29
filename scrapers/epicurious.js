@@ -33,8 +33,6 @@ const epicurious = url => {
 
           Recipe.servings = $("dd.yield").text();
 
-          console.log(Recipe)
-
           if (
             !Recipe.name ||
             !Recipe.ingredients.length ||

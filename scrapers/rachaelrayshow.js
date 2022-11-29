@@ -20,10 +20,9 @@ const rachaelrayshow = url => {
               Recipe.ingredients.push($(el).text().trim());
             })
 
-          Recipe.instructions = $(".field--name-field-recipe-instructions").find("p").each((i, el) => {
+          $(".field--name-field-recipe-instructions").find("p").each((i, el) => {
             Recipe.instructions.push($(el).text().trim());
           });
-          Recipe.instructions = Recipe.instructions.filter(c => c);
 
           let servings = $(".yield-value").text();
           if (servings) {
@@ -34,6 +33,7 @@ const rachaelrayshow = url => {
           if (totalTime) {
             Recipe.time.total = totalTime.trim();
           }
+
           if (
             !Recipe.name ||
             !Recipe.ingredients.length ||

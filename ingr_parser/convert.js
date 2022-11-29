@@ -7,9 +7,14 @@ function convertFromFraction(value) {
     if (value && value.trim().split(' ').length > 1) {
         const [whole, fraction] = value.split(' ');
         const [a, b] = fraction.split('/');
-        const remainder = parseFloat(a) / parseFloat(b);
-        const wholeAndFraction = parseInt(whole) ? parseInt(whole) + remainder : remainder;
-        return keepThreeDecimals(wholeAndFraction);
+        let remainder = 0;
+        let wholeAndFraction = whole;
+        if (a && b) {
+            remainder = parseFloat(a) / parseFloat(b);
+            wholeAndFraction = parseInt(whole) + parseFloat(remainder);
+            return keepThreeDecimals(wholeAndFraction);
+        }
+        return wholeAndFraction;
     } else if (!value || value.split('-').length > 1) {
         return value;
     } else {
@@ -83,7 +88,7 @@ function feach(w, g, n, language) {
 }
 
 function findQuantityAndConvertIfUnicode(ingredientLine, language) {
-    const numericAndFractionRegex = /^(\d+\/\d+)|^(\d+\s\d+\/\d+)|^(\d+.\d+)|^(\d+\sand\s\d+\/\d+)/g;
+    const numericAndFractionRegex = /^(\d+\/\d+)|^(\d+\s\d+\/\d+)|^(\d+.\d+\s)|^(\d+\sand\s\d+\/\d+)/g;
     const numericAndFractionWithDashRegex = /^(\d+\-\d+\/\d+)/g;
     const numericMultiplierRegex = /^(\d+x\d+)/g;
     const numericRangeWithSpaceRegex = /^(\d+\-\d+)|^(\d+\s\-\s\d+)|^(\d+\sto\s\d+)/g; // for ex: "1 to 2" or "1 - 2"
