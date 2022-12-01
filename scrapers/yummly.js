@@ -44,6 +44,7 @@ const yummly = url => {
           resolve(Recipe);
         }
       } catch (error) {
+        console.log(error)
         reject(new Error("No recipe found on page"));
       }
     }
