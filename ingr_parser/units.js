@@ -110,10 +110,22 @@ const engPreposition = ['of'];
 const unitsMap = new Map();
 unitsMap.set("eng", [engUnits, engPreposition, engNameToSymbol]);
 
+const methods = [
+  "chopped",
+  "crushed",
+  "minced",
+  "grated",
+  "ground",
+  "shredded",
+  "sliced",
+  "diced"
+]
+
 module.exports = {
   unitsMap,
   engUnits,
   engNameToSymbol,
   engPreposition,
-  unitsMap
+  unitsMap,
+  methods
 }

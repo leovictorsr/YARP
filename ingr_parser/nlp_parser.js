@@ -1,5 +1,5 @@
 const convert = require('./convert');
-const { unitsMap } = require('./units');
+const { unitsMap, methods } = require('./units');
 const { repeatingFractions } = require('./repeatingFractions')
 
 function getUnit(input, language) {
@@ -77,6 +77,18 @@ function parse(recipeString, language) {
       restOfIngredient = restOfIngredient.replace('   ', ' ').trim();
     }
     if (commaNote) extraInfo.push(commaNote);
+
+    // grab and remove keywords that are extra info
+    let extraMethod = [];
+    for (let method of methods) {
+      extraMethod = restOfIngredient.match(new RegExp(method, "ig"));
+      if (extraMethod) {
+        const em = extraMethod[0];
+        restOfIngredient = restOfIngredient.replace(em, '').trim();
+        restOfIngredient = restOfIngredient.replace('   ', ' ').trim();
+        extraInfo.push(em);
+      }
+    }
   
     // grab unit and turn it into non-plural version, for ex: "Tablespoons" OR "Tsbp." --> "tablespoon"
     let [unit, shorthand] = getUnit(restOfIngredient, language);
