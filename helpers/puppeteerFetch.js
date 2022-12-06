@@ -13,8 +13,6 @@ const convertCookieStringToJSON = (string, domain) => {
   return JSON.stringify(cookieObject)
 }
 
-const cookieString = "g1t=1669898821027; basketful_s=db7435cf-9a81-4469-95c6-04a61478ee91; OptanonConsent=isGpcEnabled=1&datestamp=Thu+Dec+01+2022+10%3A11%3A26+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=202208.1.0&hosts=&groups=C0001%3A1%2CC0003%3A0%2CC0002%3A0%2CC0005%3A0%2CC0007%3A0%2CC0004%3A0; yv=yDh48bOCnTOZwAGbsP5j9; r_ab_state=%7B%22post-signup-upsell%22%3A%22variant-1%22%2C%22paywall-modal-variant-contextual-generic%22%3A%22default%22%2C%22main-navigation%22%3A%22default%22%7D; SameSite=None; Secure=true; basketful_u=57a77600-fdba-42df-9496-9421991fa310_424aff5fd4f7c7048b4598cf3358900f92f72a3ccc11933a7a74389c25a537a9" 
-
 const blockedResourceTypes = [
   "image",
   "media",

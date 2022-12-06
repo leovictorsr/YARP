@@ -12,7 +12,7 @@ const yummly = url => {
         const Recipe = new RecipeSchema();
         const $ = cheerio.load(html);
 
-        Recipe.name = $("meta[property='og:title']").attr("content");
+        Recipe.name = $("h1.recipe-title").text();
         Recipe.image = $("meta[property='og:image']").attr("content");
 
         $(".IngredientLine").each((i, el) => {
