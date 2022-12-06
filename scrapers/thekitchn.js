@@ -68,6 +68,4 @@ const thekitchn = url => {
   });
 };
 
-thekitchn("https://www.thekitchn.com/chicken-sweet-potato-noodle-bowls-recipe-23033871");
-
 module.exports = thekitchn;
