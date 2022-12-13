@@ -1,5 +1,6 @@
 const RecipeSchema = require("../helpers/recipe-schema");
 const puppeteerFetch = require("../helpers/puppeteerFetch");
+const cheerio = require("cheerio");
 
 const damnDelicious = url => {
   return new Promise(async (resolve, reject) => {
@@ -11,50 +12,24 @@ const damnDelicious = url => {
         const Recipe = new RecipeSchema();
         const $ = cheerio.load(html);
 
-        let titleDiv = $(".recipe-title");
-
         Recipe.image = $("meta[property='og:image']").attr("content");
-        Recipe.name = $(titleDiv)
-          .children("h2")
-          .text();
+        Recipe.name = $(".wprm-recipe-name").text();
 
-        $(titleDiv)
-          .find("p")
-          .each((i, el) => {
-            let title = $(el)
-              .children("strong")
-              .text();
-            let data = $(el)
-              .children("span")
-              .text();
-
-            switch (title) {
-              case "Yield:":
-                Recipe.servings = data;
-                break;
-              case "prep time:":
-                Recipe.time.prep = data;
-                break;
-              case "cook time:":
-                Recipe.time.cook = data;
-                break;
-              case "total time:":
-                Recipe.time.total = data;
-                break;
-              default:
-                break;
-            }
-          });
-
-        $("li[itemprop=ingredients]").each((i, el) => {
+        console.log(Recipe)
+        $("li.wprm-recipe-ingredient").each((i, el) => {
           Recipe.ingredients.push($(el).text());
         });
 
-        $(".instructions")
-          .find("li")
-          .each((i, el) => {
-            Recipe.instructions.push($(el).text());
-          });
+        $("li.wprm-recipe-instruction").each((i, el) => {
+          Recipe.instructions.push($(el).text());
+        });
+
+        Recipe.servings = $("span.wprm-recipe-servings-with-unit").text();
+        $("span.wprm-recipe-time").each((i, el) => {
+          if (i == 0) Recipe.time.prep = $(el).text();
+          if (i == 1) Recipe.time.cook = $(el).text();
+          if (i == 2) Recipe.time.total = $(el).text();
+        })
 
         if (
           !Recipe.name ||

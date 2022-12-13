@@ -12,18 +12,18 @@ const woolworths = url => {
         const Recipe = new RecipeSchema();
         const $ = cheerio.load(html);
 
-        Recipe.image = $("meta[property='og:image']").attr("content");
-        Recipe.name = $("h1").first().text().trim();
+        Recipe.image = $("aem-page").find("meta[property='og:image']").attr("content");
+        Recipe.name = $("aem-page").find("h1.recipeTitle-text").text().trim();
 
-        $("div.ingredient-list").each((i, el) => {
+        $("aem-page").find("div.ingredient-list").each((i, el) => {
           Recipe.ingredients.push(
-            $(el)
+            $(el).find("div").first()
               .text()
               .trim()
           );
         });
 
-        $("div.step-content").each((i, el) => {
+        $("aem-page").find("aem-shared-content.step-content").each((i, el) => {
           Recipe.instructions.push(
             $(el)
               .text()
@@ -31,11 +31,13 @@ const woolworths = url => {
           );
         });
 
-        $("div.summaryPanel-contentItem--content").each((i, el) => {
+        $("aem-page").find("div.summaryPanel-contentItem--content").each((i, el) => {
           if (i == 0) Recipe.time.prep = $(el).text().trim()
           else if (i == 1) Recipe.time.cook = $(el).text().trim()
           else if (i == 2) Recipe.servings = $(el).text().trim()
         });
+
+        console.log(Recipe)
 
         if (
           !Recipe.name ||
