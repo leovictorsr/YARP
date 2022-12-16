@@ -120,7 +120,6 @@ const puppeteerFetch = async url => {
   await page.setCookie({name: 'Secure', value: 'true', domain});
 
   const response = await page.goto(url);
-  console.log(response)
 
   if (response._status < 400) {
     let html = await page.content();
