@@ -12,8 +12,9 @@ function getUnit(input, language) {
   }
   for (const unit of Object.keys(units)) {
     for (const shorthand of units[unit]) {
-      const regex = new RegExp('(?=\\b\\s*' + shorthand + '\\s+\\b)', 'gi')
+      const regex = new RegExp('(?=\\b\\s+' + shorthand + '\\s+\\b)', 'gi')
       if (input.match(regex)) {
+        console.log(input, unit, regex)
         response.push(unit);
         response.push(shorthand);
         break;
@@ -92,6 +93,7 @@ function parse(recipeString, language) {
   
     // grab unit and turn it into non-plural version, for ex: "Tablespoons" OR "Tsbp." --> "tablespoon"
     let [unit, shorthand] = getUnit(restOfIngredient, language);
+    console.log(unit)
     // remove unit from the ingredient if one was found and trim leading and trailing whitespace
   
     let ingredient = restOfIngredient.replace(unit, '').trim();
