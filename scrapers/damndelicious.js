@@ -15,7 +15,6 @@ const damnDelicious = url => {
         Recipe.image = $("meta[property='og:image']").attr("content");
         Recipe.name = $(".wprm-recipe-name").text();
 
-        console.log(Recipe)
         $("li.wprm-recipe-ingredient").each((i, el) => {
           Recipe.ingredients.push($(el).text());
         });
