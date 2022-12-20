@@ -62,13 +62,13 @@ const domains = {
   whatsgabycooking: require("./scrapers/whatsgabycooking"),
   woolworths: require("./scrapers/woolworths"),
   yummly: require("./scrapers/yummly"),
-
   thekitchn: require("./scrapers/thekitchn"),
   rachaelray: require("./scrapers/rachaelray"),
   rachaelrayshow: require("./scrapers/rachaelrayshow"),
   tablespoon: require("./scrapers/tablespoon"),
   sallysbakingaddiction: require("./scrapers/sallysbakingaddiction"),
   tasteofhome: require("./scrapers/tasteofhome"),
+  jsonLd: require("./scrapers/jsonLd")
 };
 
 app.get("/parse", (req, res) => {
@@ -93,6 +93,7 @@ const recipeScraper = url => {
       if (domains[domain] !== undefined) {
         resolve(domains[domain](url));
       } else {
+        resolve(domains["jsonLd"](url));
         console.log("Recipe Site not yet supported :" + url);
         reject(new Error("Recipe Site not yet supported"));
       }
