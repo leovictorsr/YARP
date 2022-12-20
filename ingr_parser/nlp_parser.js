@@ -64,22 +64,25 @@ function parse(recipeString, language) {
     let extraInfo;
     restOfIngredient = restOfIngredient.replace(/^\s*-/, ' ').trim();
     restOfIngredient = restOfIngredient.replace('+', '').trim();
-    restOfIngredient = restOfIngredient.replace(/\s\s/gi, '').trim();
+    restOfIngredient = restOfIngredient.replace(/\s\s/gi, ' ').trim();
+
+    if (restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)/g)) {
+      extraInfo = restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)|\/\s+([\w+]+)\s+([\w+]+)/g);
+      extraInfo = extraInfo.filter(i => i.includes("(") || i.includes("/"));
+      extraInfo = extraInfo.map(e => e.replace("(", "").replace(")", ""));
+      extraInfo.map(ei => restOfIngredient = restOfIngredient.replace(ei, '').replace("(", "").replace(")", "").trim());
+      restOfIngredient = restOfIngredient.replace('   ', ' ').trim();
+    }
   
     let commaNote = restOfIngredient.split(',');
     restOfIngredient = commaNote.shift();
     commaNote = commaNote.join(',').trim();
-  
-    if (restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)/g)) {
-      extraInfo = restOfIngredient.match(/([\w+]+)|(\((?:\(??[^\()]*?\)))|([\w+]+)|\/\s+([\w+]+)\s+([\w+]+)/g);
-      extraInfo = extraInfo.filter(i => i.includes("(") || i.includes("/"));
-      extraInfo.map(ei => restOfIngredient = restOfIngredient.replace(ei, '').trim());
-      restOfIngredient = restOfIngredient.replace('   ', ' ').trim();
-    }
     if (commaNote) extraInfo.push(commaNote);
-  
-    // grab unit and turn it into non-plural version, for ex: "Tablespoons" OR "Tsbp." --> "tablespoon"
-    let [unit, shorthand] = getUnit(restOfIngredient, language);
+
+    let beforeNote = restOfIngredient.split(':');
+    restOfIngredient = beforeNote.pop();
+    beforeNote = beforeNote.join(',').trim();
+    if (beforeNote) extraInfo.push(beforeNote);
 
     // grab and remove keywords that are extra info
     let extraMethod = [];
@@ -92,12 +95,14 @@ function parse(recipeString, language) {
         extraInfo.push(em);
       }
     }
+  
+    // grab unit and turn it into non-plural version, for ex: "Tablespoons" OR "Tsbp." --> "tablespoon"
+    let [unit, shorthand] = getUnit(restOfIngredient, language);
+    const shorthandRegex = new RegExp(`${shorthand}`, 'i');
+    let ingredient = restOfIngredient.replace(shorthandRegex, '').trim();
+    ingredient = ingredient.split('.').join("").trim();
 
     // remove unit from the ingredient if one was found and trim leading and trailing whitespace
-    let ingredient = restOfIngredient.replace(unit, '').trim();
-    const shorthandRegex = new RegExp(`${shorthand}`, 'gi');
-    ingredient = restOfIngredient.replace(shorthandRegex, '').trim();
-    ingredient = ingredient.split('.').join("").trim();
     let preposition = getPreposition(ingredient.split(' ')[0], language);
   
     if (preposition) {

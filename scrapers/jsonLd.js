@@ -1,42 +1,43 @@
-const request = require("request");
+const puppeteerFetch = require("../helpers/puppeteerFetch");
 const cheerio = require("cheerio");
 const RecipeSchema = require("../helpers/recipe-schema");
 
 const jsonLd = url => {
-  const Recipe = new RecipeSchema();
-  return new Promise((resolve, reject) => {
-    request(url, (error, response, html) => {
-      if (!error && response.statusCode === 200) {
-        const $ = cheerio.load(html);
-        const jsonLd = JSON.parse($("script[type='application/ld+json']").text());
-        const recipe = jsonLd["@graph"].filter(e => e["@type"] === "Recipe")[0];
+  return new Promise(async (resolve, reject) => {
+    try {
+      const Recipe = new RecipeSchema();
+      const html = await puppeteerFetch(url);
+      const $ = cheerio.load(html);
 
-        Recipe.name = recipe.name;
-        Recipe.image = recipe.image[0];
-        Recipe.yield = recipe.yield;
-        if (recipe.prepTime) Recipe.time.prep = recipe.prepTime.replace("PT", "").replace("M", " minutes");
-        if (recipe.cookTime) Recipe.time.cook = recipe.cookTime.replace("PT", "").replace("M", " minutes");
-        if (recipe.totalTime) Recipe.time.total = recipe.totalTime.replace("PT", "").replace("M", " minutes");
+      const jsonLd = JSON.parse($("script[type='application/ld+json']").text());
+      let recipe;
+      if (jsonLd["@graph"]) recipe = jsonLd["@graph"].filter(e => e["@type"] === "Recipe")[0];
+      else recipe = jsonLd;
 
-        Recipe.ingredients = recipe.recipeIngredient;
-        Recipe.instructions = recipe.recipeInstructions.map(e => e.name);
-        Recipe.url = url;
+      Recipe.name = recipe.name;
+      Recipe.image = recipe.image[0].contentUrl ? recipe.image[0].contentUrl : recipe.image[0];
+      Recipe.servings = recipe.recipeYield.toString();
+      if (recipe.prepTime) Recipe.time.prep = recipe.prepTime.replace("PT", "").replace("H", " hours ").replace("M", " minutes").trim();
+      if (recipe.cookTime) Recipe.time.cook = recipe.cookTime.replace("PT", "").replace("H", " hours ").replace("M", " minutes").trim();
+      if (recipe.totalTime) Recipe.time.total = recipe.totalTime.replace("PT", "").replace("H", " hours ").replace("M", " minutes").trim();
 
-        console.log(Recipe);
+      Recipe.ingredients = recipe.recipeIngredient.map(e => e.replace("))", ")").replace("((", "("));
+      Recipe.instructions = recipe.recipeInstructions.map(e => e.text ? e.text : e.name);
+      Recipe.url = url;
 
-        if (
-          !Recipe.name ||
-          !Recipe.ingredients.length ||
-          !Recipe.instructions.length
-        ) {
-          reject(new Error("No recipe found on page"));
-        } else {
-          resolve(Recipe);
-        }
-      } else {
+
+      if (
+        !Recipe.name ||
+        !Recipe.ingredients.length ||
+        !Recipe.instructions.length
+      ) {
         reject(new Error("No recipe found on page"));
+      } else {
+        resolve(Recipe);
       }
-    });
+    } catch (e) {
+      reject(new Error("No recipe found on page: " + e));
+    }
   });
 };
 

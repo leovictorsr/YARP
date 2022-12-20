@@ -5,14 +5,13 @@ const engUnits = {
   can: ['can', 'cans'],
   cup: ['cup', 'c', 'c.', 'C', 'Cups', 'cups'],
   clove: ['clove'],
-  each: ['each', 'Each', 'ea', 'ea.'],
   gallon: ['gallon', 'gal', 'gallons'],
   ounce: ['ounce', 'ounces', 'oz', 'oz.', 'ozs'],
   pint: ['pint', 'pt', 'pts', 'pt.', 'pints'],
   pound: ['pound', 'lb', 'lb.', 'lbs', 'lbs.', 'Lb', 'Lbs', 'pounds'],
   quart: ['quart', 'qt', 'qt.', 'qts', 'qts.', 'quarts'],
   tablespoon: ['tbs', 'tbsp', 'tbsp.', 'Tbsp.', 'tbspn', 'Tablespoons', 'Tablespoon'],
-  teaspoon: ['teaspoon', 'teaspoons', 'tsp', 'tsp.', 'tspn', 'tsps', 'tspns'],
+  teaspoon: ['teaspoon', 'teaspoons', 'Tsp', 'tsp', 'tsp.', 'tspn', 'tsps', 'tspns'],
   gram: ['gram', 'grams', 'g', 'g.'],
   kilogram: ['kilogram', 'kg', 'kg.', 'Kg', 'Kg.', 'kilograms'],
   liter: ['liter', 'l', 'l.', 'lt', 'Lt', 'LT', 'L', 'L.', 'liters'],
@@ -78,7 +77,8 @@ const engUnits = {
   pouch: ['pouch', 'pouches'],
   envelope: ['envelope', 'envelopes'],
   pack: ['pack', 'packs'],
-  count: ['count', 'ct']
+  count: ['count', 'ct'],
+  each: ['each', 'Each', 'ea', 'ea.'],
 };
 
 const engNameToSymbol = {
@@ -133,6 +133,8 @@ const methods = [
   "Finely chopped",
   "Freshly squeezed",
   "Freshly ground",
+  "Freshly grated",
+  "Thinly sliced",
   "Chopped",
   "Crushed",
   "Minced",

@@ -87,19 +87,22 @@ app.get("/parse", (req, res) => {
 
 const recipeScraper = url => {
   return new Promise((resolve, reject) => {
-    let parse = parseDomain(url);
-    if (parse) {
-      let domain = parse.domain;
-      if (domains[domain] !== undefined) {
-        resolve(domains[domain](url));
+    try {
+      resolve(domains["jsonLd"](url));
+    } catch (e) {
+      let parse = parseDomain(url);
+      if (parse) {
+        let domain = parse.domain;
+        if (domains[domain] !== undefined) {
+          resolve(domains[domain](url));
+        } else {
+          console.log("Recipe Site not yet supported :" + url);
+          reject(new Error("Recipe Site not yet supported"));
+        }
       } else {
-        resolve(domains["jsonLd"](url));
-        console.log("Recipe Site not yet supported :" + url);
-        reject(new Error("Recipe Site not yet supported"));
+        console.log("Failed to parse Recipe on the website :" + url);
+        reject(new Error("Failed to parse Recipe on the website"));
       }
-    } else {
-      console.log("Failed to parse Recipe on the website :" + url);
-      reject(new Error("Failed to parse Recipe on the website"));
     }
   });
 };
@@ -165,6 +168,7 @@ app.get('/parseRecipeOnCloud', async function (req, res, next) {
       console.log("\n\nReturning Recipe in a custom format to App :%j", recipe);
       res.status(200).send(recipe);
     }).catch(function (error) {
+      console.log(error)
       console.log("Exception caught processing Recipe :" + error);
       res.status(561).send(error);
     });
