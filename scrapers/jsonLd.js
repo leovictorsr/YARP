@@ -14,9 +14,9 @@ const jsonLd = url => {
         Recipe.name = recipe.name;
         Recipe.image = recipe.image[0];
         Recipe.yield = recipe.yield;
-        Recipe.time.prep = recipe.prepTime.replace("PT", "").replace("M", " minutes");
-        Recipe.time.cook = recipe.cookTime.replace("PT", "").replace("M", " minutes");
-        Recipe.time.total = recipe.totalTime.replace("PT", "").replace("M", " minutes");
+        if (recipe.prepTime) Recipe.time.prep = recipe.prepTime.replace("PT", "").replace("M", " minutes");
+        if (recipe.cookTime) Recipe.time.cook = recipe.cookTime.replace("PT", "").replace("M", " minutes");
+        if (recipe.totalTime) Recipe.time.total = recipe.totalTime.replace("PT", "").replace("M", " minutes");
 
         Recipe.ingredients = recipe.recipeIngredient;
         Recipe.instructions = recipe.recipeInstructions.map(e => e.name);
