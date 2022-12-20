@@ -7,7 +7,7 @@ const convertCookieStringToJSON = (string, domain) => {
   let cookieObject = []
   cookieString.map(s => {
     let [key, value] = s.split("=");
-    cookieObject.push({name: key, value, domain});
+    cookieObject.push({ name: key, value, domain });
   });
 
   return JSON.stringify(cookieObject)
@@ -64,11 +64,11 @@ const puppeteerFetch = async url => {
     ignoreHTTPSErrors: true,
     userDataDir: './tmp'
   };
-  
+
   const browser = await puppeteer.launch(options);
 
   const page = (await browser.pages())[0];
-  
+
   await page.evaluateOnNewDocument(() => {
     Object.defineProperty(navigator, 'webdriver', {
       get: () => false,
@@ -87,7 +87,7 @@ const puppeteerFetch = async url => {
       req.continue();
     }
   })
-  
+
   // Pass the Permissions Test.
   await page.evaluateOnNewDocument(() => {
     const originalQuery = window.navigator.permissions.query;
@@ -106,7 +106,7 @@ const puppeteerFetch = async url => {
       // but we could mock the plugins too if necessary.
       get: () => [1, 2, 3, 4, 5],
     });
-  }); 
+  });
 
   // Pass the Languages Test.
   await page.evaluateOnNewDocument(() => {
@@ -117,24 +117,12 @@ const puppeteerFetch = async url => {
   });
 
   const domain = "https://" + url.split("/")[2];
-  await page.setCookie({name: 'Secure', value: 'true', domain});
+  await page.setCookie({ name: 'Secure', value: 'true', domain });
 
-  const response = await page.goto(url);
-
-  if (response._status < 400) {
-    let html = await page.content();
-    try {
-      //await browser.close();
-    } finally {
-      return html;
-    } // avoid websocket error if browser already closed
-  } else {
-    try {
-      //await browser.close();
-    } finally {
-      return Promise.reject(response._status);
-    }
-  }
+  await page.goto(url);
+  let html = await page.content();
+  await browser.close();
+  return html;
 };
 
 module.exports = puppeteerFetch;
