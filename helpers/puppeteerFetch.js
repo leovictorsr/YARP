@@ -49,7 +49,7 @@ const puppeteerFetch = async url => {
   ];
   const options = {
     args,
-    headless: false,
+    headless: true,
     ignoreHTTPSErrors: true,
     userDataDir: './tmp'
   };
@@ -109,9 +109,6 @@ const puppeteerFetch = async url => {
   await page.setCookie({ name: 'Secure', value: 'true', domain });
 
   await page.goto(url);
-  await page.waitFor(10000);
-
-  await page.click("div[aria-label='Press & Hold']", {delay: 5000});
   let html = await page.content();
   await browser.close();
   return html;

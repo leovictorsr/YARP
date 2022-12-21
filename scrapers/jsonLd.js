@@ -14,8 +14,8 @@ const clean = s => {
 }
 
 const checkObject = (o, k) => {
-  if (typeof o == 'object') return o[k]
-  else if (Array.isArray(o)) return o[0][k]
+  if (Array.isArray(o)) return (o[0][k] ? o[0][k] : o[0])
+  else if (typeof o == 'object') return o[k]
   else return o
 }
 
