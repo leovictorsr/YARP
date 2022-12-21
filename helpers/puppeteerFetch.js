@@ -2,17 +2,6 @@ const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-const convertCookieStringToJSON = (string, domain) => {
-  let cookieString = string.split(";");
-  let cookieObject = []
-  cookieString.map(s => {
-    let [key, value] = s.split("=");
-    cookieObject.push({ name: key, value, domain });
-  });
-
-  return JSON.stringify(cookieObject)
-}
-
 const blockedResourceTypes = [
   "image",
   "media",
@@ -60,7 +49,7 @@ const puppeteerFetch = async url => {
   ];
   const options = {
     args,
-    headless: true,
+    headless: false,
     ignoreHTTPSErrors: true,
     userDataDir: './tmp'
   };
@@ -120,6 +109,9 @@ const puppeteerFetch = async url => {
   await page.setCookie({ name: 'Secure', value: 'true', domain });
 
   await page.goto(url);
+  await page.waitFor(10000);
+
+  await page.click("div[aria-label='Press & Hold']", {delay: 5000});
   let html = await page.content();
   await browser.close();
   return html;
