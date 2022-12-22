@@ -107,11 +107,23 @@ const puppeteerFetch = async url => {
 
   const domain = "https://" + url.split("/")[2];
   await page.setCookie({ name: 'Secure', value: 'true', domain });
+  
+  const response = await page.goto(url);
 
-  await page.goto(url);
-  let html = await page.content();
-  await browser.close();
-  return html;
+  if (response._status < 400) {
+    let html = await page.content();
+    try {
+      await browser.close();
+    } finally {
+      return html;
+    }
+  } else {
+    try {
+      await browser.close();
+    } finally {
+      return Promise.reject(response._status);
+    }
+  }
 };
 
 module.exports = puppeteerFetch;
