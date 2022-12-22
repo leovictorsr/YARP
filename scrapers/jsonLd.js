@@ -21,7 +21,13 @@ const checkObject = (o, k) => {
 const jsonLd = url => {
   return new Promise(async (resolve, reject) => {
     const Recipe = new RecipeSchema();
-    const html = await puppeteerFetch(url);
+    let html;
+    try {
+      html = await puppeteerFetch(url);
+    } catch (e) {
+      reject(e);
+      return;
+    }
     const $ = cheerio.load(html);
 
     const parsedJson = []

@@ -110,7 +110,7 @@ const puppeteerFetch = async url => {
   
   const response = await page.goto(url);
 
-  if (response._status < 400) {
+  if (response && response._status < 400) {
     let html = await page.content();
     try {
       await browser.close();
@@ -121,7 +121,11 @@ const puppeteerFetch = async url => {
     try {
       await browser.close();
     } finally {
-      return Promise.reject(response._status);
+      let rejection;
+
+      if (!response) rejection = "No response from the site";
+      else if (response._status) rejection = "Response received: " + response._status;
+      return Promise.reject(rejection);
     }
   }
 };
