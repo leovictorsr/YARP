@@ -32,7 +32,7 @@ const jsonLd = url => {
     for (let e of parsedJson.flat(Infinity)) {
       if (e["@graph"]) recipeJson = e["@graph"].filter(r => r["@type"].toString().includes("Recipe"))[0];
       else if (Array.isArray(e)) recipeJson = e.filter(r => !Array.isArray(r) && r["@type"].toString().includes("Recipe"))[0];
-      else if (e["@type"].toString().includes("Recipe")) recipeJson = e;
+      else if (e["@type"] && e["@type"].toString().includes("Recipe")) recipeJson = e;
     }
 
     if (!recipeJson || Array.isArray(recipeJson)) {
