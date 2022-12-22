@@ -44,12 +44,11 @@ const jsonLd = url => {
         recipeJson = e.filter(r => !Array.isArray(r) && r["@type"].toString().includes("Recipe"))[0];
         break;
       }
-      else if (e["@type"] && e["@type"].toString().includes("Recipe"))
+      else if (e["@type"] && e["@type"].toString().includes("Recipe")) {
         recipeJson = e;
         break;
+      }
     }
-
-    console.log(recipeJson)
 
     if (!recipeJson || Array.isArray(recipeJson)) {
       reject("No valid Recipe found on JSON+LD tag");
