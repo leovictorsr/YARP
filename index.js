@@ -11,8 +11,8 @@ const LANGUAGE = 'eng';
 const groupRegex = /^\w+\:/gi;
 
 const cleanup = (i) => {
-    const cleanedIngredient = i.replace("–", "-").replace(' /', '/').toLowerCase();
-    return cleanedIngredient;
+  const cleanedIngredient = i.replace("–", "-").replace(' /', '/').toLowerCase();
+  return cleanedIngredient;
 };
 
 const domains = {
@@ -87,9 +87,7 @@ app.get("/parse", (req, res) => {
 
 const recipeScraper = url => {
   return new Promise((resolve, reject) => {
-    try {
-      resolve(domains["jsonLd"](url));
-    } catch (e) {
+    domains["jsonLd"](url).then(recipe => resolve(recipe)).catch(e => {
       let parse = parseDomain(url);
       if (parse) {
         let domain = parse.domain;
@@ -103,7 +101,7 @@ const recipeScraper = url => {
         console.log("Failed to parse Recipe on the website :" + url);
         reject(new Error("Failed to parse Recipe on the website"));
       }
-    }
+    });
   });
 };
 
@@ -180,27 +178,27 @@ app.get('/parseIngredients', (req, res) => {
   let group = [];
   let currentGroup = "";
   if (Array.isArray(ingredients)) {
-      const hasGroup = ingredients.reduce((prev, curr) => prev || curr.match(groupRegex), false);
-      for (let i of ingredients) {
-          let parsedIngredient = parse_ingredient(cleanup(i), LANGUAGE);
+    const hasGroup = ingredients.reduce((prev, curr) => prev || curr.match(groupRegex), false);
+    for (let i of ingredients) {
+      let parsedIngredient = parse_ingredient(cleanup(i), LANGUAGE);
 
-          if (!hasGroup) {
-              parsedIngredients.push(parsedIngredient);
-          }
-          else if (hasGroup && i.match(groupRegex)) {
-              currentGroup = i.match(groupRegex)[0].replace(":", "").trim();
-              if (group.length) {
-                  parsedIngredients.push(group);
-                  group = [];
-              }
-          }
-          else if (hasGroup) {
-              parsedIngredient.group = currentGroup;
-              group.push(parsedIngredient);
-          }
+      if (!hasGroup) {
+        parsedIngredients.push(parsedIngredient);
       }
+      else if (hasGroup && i.match(groupRegex)) {
+        currentGroup = i.match(groupRegex)[0].replace(":", "").trim();
+        if (group.length) {
+          parsedIngredients.push(group);
+          group = [];
+        }
+      }
+      else if (hasGroup) {
+        parsedIngredient.group = currentGroup;
+        group.push(parsedIngredient);
+      }
+    }
 
-      if (group.length) parsedIngredients.push(group);
+    if (group.length) parsedIngredients.push(group);
   }
 
   res.send(parsedIngredients);
