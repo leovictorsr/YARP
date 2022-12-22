@@ -28,10 +28,11 @@ const jsonLd = url => {
     $("script[type='application/ld+json']").map((i, el) => parsedJson.push(JSON.parse($(el).text())));
 
     let recipeJson;
+
     for (let e of parsedJson.flat(Infinity)) {
       if (e["@graph"]) recipeJson = e["@graph"].filter(r => r["@type"].toString().includes("Recipe"))[0];
       else if (Array.isArray(e)) recipeJson = e.filter(r => !Array.isArray(r) && r["@type"].toString().includes("Recipe"))[0];
-      else if (e["@type"] == "Recipe") recipeJson = e;
+      else if (e["@type"].toString().includes("Recipe")) recipeJson = e;
     }
 
     if (!recipeJson || Array.isArray(recipeJson)) {
