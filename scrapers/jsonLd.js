@@ -1,16 +1,15 @@
 const puppeteerFetch = require("../helpers/puppeteerFetch");
 const cheerio = require("cheerio");
 const RecipeSchema = require("../helpers/recipe-schema");
-const { engNameToSymbol } = require("../ingr_parser/units");
 
 const clean = s => {
   return s.toString()
-          .replace("PT", "")
-          .replace("H", " hours ")
-          .replace("M", " minutes")
-          .replace("))", ")")
-          .replace("((", "(")
-          .trim()
+    .replace("PT", "")
+    .replace("H", " hours ")
+    .replace("M", " minutes")
+    .replace("))", ")")
+    .replace("((", "(")
+    .trim()
 }
 
 const checkObject = (o, k) => {
@@ -25,37 +24,49 @@ const jsonLd = url => {
     const html = await puppeteerFetch(url);
     const $ = cheerio.load(html);
 
-    const jsonLd = JSON.parse($("script[type='application/ld+json']").first().text());
-    let recipeJsonLd;
+    const parsedJson = []
+    $("script[type='application/ld+json']").map((i, el) => parsedJson.push(JSON.parse($(el).text())));
 
-    if (jsonLd["@graph"]) recipeJsonLd = jsonLd["@graph"].filter(e => e["@type"].toString().includes("Recipe"))[0];
-    else if (Array.isArray(jsonLd)) recipeJsonLd = jsonLd.filter(e => e["@type"].toString().includes("Recipe"))[0];
-    else recipeJsonLd = jsonLd;
+    let recipeJson;
+    for (let e of parsedJson) {
+      if (e["@graph"]) recipeJson = e["@graph"].filter(r => r["@type"].toString().includes("Recipe"))[0];
+      else if (Array.isArray(e)) recipeJson = e.filter(r => !Array.isArray(r) && r["@type"].toString().includes("Recipe"))[0];
+      else if (e["@type"] == "Recipe") recipeJson = e;
+    }
 
-    Recipe.name = recipeJsonLd.name;
+    if (!recipeJson || Array.isArray(recipeJson)) {
+      reject("No valid Recipe found on JSON+LD tag");
+      return;
+    }
 
-    Recipe.image = checkObject(recipeJsonLd.image, "url");
-    console.log(Recipe.image, recipeJsonLd)
-    if (!Recipe.image) Recipe.image = checkObject(recipeJsonLd.image, "contentUrl")
-    if (!Recipe.image) Recipe.image = checkObject(recipeJsonLd.image, "url")
+    if (!recipeJson["@type"].toString().includes("Recipe")) {
+      reject("No valid Recipe found on JSON+LD tag");
+      return;
+    }
 
-    if (recipeJsonLd.recipeYield) Recipe.servings = recipeJsonLd.recipeYield.toString();
-    if (recipeJsonLd.prepTime) Recipe.time.prep = clean(checkObject(recipeJsonLd.prepTime, "maxValue"));
-    if (recipeJsonLd.cookTime) Recipe.time.cook = clean(checkObject(recipeJsonLd.cookTime, "maxValue"));
-    if (recipeJsonLd.totalTime) Recipe.time.total = clean(checkObject(recipeJsonLd.totalTime, "maxValue"));
+    Recipe.name = recipeJson.name;
 
-    Recipe.ingredients = recipeJsonLd.recipeIngredient.map(e => clean(e));
-    if (recipeJsonLd.recipeInstructions) 
-      if (Array.isArray(recipeJsonLd.recipeInstructions))
-        Recipe.instructions = recipeJsonLd.recipeInstructions.map(e => e.text ? e.text : e.name);
-      else if (typeof recipeJsonLd.recipeInstructions == 'string') {
-        const $$ = cheerio.load(recipeJsonLd.recipeInstructions);
+    Recipe.image = checkObject(recipeJson.image, "url");
+    if (!Recipe.image) Recipe.image = checkObject(recipeJson.image, "contentUrl")
+    if (!Recipe.image) Recipe.image = checkObject(recipeJson.image, "url")
+
+    if (recipeJson.recipeYield) Recipe.servings = recipeJson.recipeYield.toString();
+    if (recipeJson.prepTime) Recipe.time.prep = clean(checkObject(recipeJson.prepTime, "maxValue"));
+    if (recipeJson.cookTime) Recipe.time.cook = clean(checkObject(recipeJson.cookTime, "maxValue"));
+    if (recipeJson.totalTime) Recipe.time.total = clean(checkObject(recipeJson.totalTime, "maxValue"));
+
+    Recipe.ingredients = recipeJson.recipeIngredient.map(e => clean(e));
+    if (recipeJson.recipeInstructions)
+      if (Array.isArray(recipeJson.recipeInstructions))
+        Recipe.instructions = recipeJson.recipeInstructions.map(e => e.text ? e.text : e.name);
+      else if (typeof recipeJson.recipeInstructions == 'string') {
+        const $$ = cheerio.load(recipeJson.recipeInstructions);
         $$("li").each((i, el) => {
           Recipe.instructions.push($$(el).text());
         })
       }
     Recipe.url = url;
-    
+
     resolve(Recipe);
   });
 };
