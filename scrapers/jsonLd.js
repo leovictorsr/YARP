@@ -36,10 +36,20 @@ const jsonLd = url => {
     let recipeJson;
 
     for (let e of parsedJson.flat(Infinity)) {
-      if (e["@graph"]) recipeJson = e["@graph"].filter(r => r["@type"].toString().includes("Recipe"))[0];
-      else if (Array.isArray(e)) recipeJson = e.filter(r => !Array.isArray(r) && r["@type"].toString().includes("Recipe"))[0];
-      else if (e["@type"] && e["@type"].toString().includes("Recipe")) recipeJson = e;
+      if (e["@graph"]) {
+        recipeJson = e["@graph"].filter(r => r["@type"].toString().includes("Recipe"))[0];
+        break;
+      }
+      else if (Array.isArray(e)) {
+        recipeJson = e.filter(r => !Array.isArray(r) && r["@type"].toString().includes("Recipe"))[0];
+        break;
+      }
+      else if (e["@type"] && e["@type"].toString().includes("Recipe"))
+        recipeJson = e;
+        break;
     }
+
+    console.log(recipeJson)
 
     if (!recipeJson || Array.isArray(recipeJson)) {
       reject("No valid Recipe found on JSON+LD tag");
