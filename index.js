@@ -94,6 +94,7 @@ const recipeScraper = url => {
         resolve(domains[domain](url));
       } else {
         domains["jsonLd"](url).then(recipe => resolve(recipe)).catch(e => {
+          console.log(e)
           console.log("Failed to parse Recipe on the website :" + url);
           reject(new Error("Recipe Site not yet supported"));
         });
@@ -145,7 +146,7 @@ app.get('/parseRecipeOnCloud', async function (req, res, next) {
     .then(recipe => {
       console.log("\nRecipe Scraped, JSON is :%j", recipe);
       recipe.url = url;
-      const ingrParserResult = ingredient_parser
+      const ingrParserResult = ingredient_parser(recipe.ingredients)
       let parsedIngredients = [];
       for (i = 0; i < ingrParserResult.length; i++) {
         const ingredient = ingrParserResult[i];

@@ -18,7 +18,7 @@ function Recipe() {
   this.servingsOriginal = "";
   this.image = "";
   this.url = "";
-  this.nutritional_facts = [];
+  this.nutrition = [];
   this.category = "";
   this.cuisine = "";
   this.keywords = [];

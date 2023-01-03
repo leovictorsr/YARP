@@ -62,9 +62,9 @@ const jsonLd = url => {
 
     Recipe.name = recipeJson.name;
 
-    Recipe.nutritional_facts = recipeJson.nutritional_facts;
-    Recipe.category = recipeJson.category;
-    Recipe.cuisine = recipeJson.cuisine;
+    Recipe.nutrition = recipeJson.nutrition;
+    Recipe.category = recipeJson.recipeCategory;
+    Recipe.cuisine = recipeJson.recipeCuisine;
     Recipe.keywords = recipeJson.keywords;
 
     Recipe.image = checkObject(recipeJson.image, "url");
