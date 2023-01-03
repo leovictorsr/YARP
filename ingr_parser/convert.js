@@ -149,6 +149,13 @@ function findQuantityAndConvertIfUnicode(ingredientLine, language) {
         return [ingredientLine.match(numericAndFractionRangeWithSpaceRegex) && quantity, restOfIngredient];
     }
     
+    // split when number + unit, for example "300g"
+    if (ingredientLine.match(/\d+/g)) {
+        const quantity = ingredientLine.match(/\d+/g)[0];
+        const restOfIngredient = ingredientLine.replace(quantity, '').trim()
+        return [quantity, restOfIngredient];
+    }
+    
     if (ingredientLine.match(wordUntilSpace)) {
         const quantity = getFirstMatch(ingredientLine, wordUntilSpace);
         let quantityNumber = text2num(quantity.toLowerCase(), language);
@@ -160,11 +167,8 @@ function findQuantityAndConvertIfUnicode(ingredientLine, language) {
         else
             return [null, ingredientLine];
     }
-
-    // no parse-able quantity found
-    else {
-        return [null, ingredientLine];
-    }
+    
+    return [null, ingredientLine];
 }
 
 function keepThreeDecimals(val) {
