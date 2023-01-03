@@ -107,6 +107,37 @@ const recipeScraper = url => {
 
 module.exports = recipeScraper;
 
+const ingredient_parser = (ingredients) => {
+  let parsedIngredients = [];
+  let group = [];
+  let currentGroup = "";
+  if (Array.isArray(ingredients)) {
+    const hasGroup = ingredients.reduce((prev, curr) => prev || curr.match(groupRegex), false);
+    for (let i of ingredients) {
+      let parsedIngredient = parse_ingredient(cleanup(i), LANGUAGE);
+
+      if (!hasGroup) {
+        parsedIngredients.push(parsedIngredient);
+      }
+      else if (hasGroup && i.match(groupRegex)) {
+        currentGroup = i.match(groupRegex)[0].replace(":", "").trim();
+        if (group.length) {
+          parsedIngredients.push(group);
+          group = [];
+        }
+      }
+      else if (hasGroup) {
+        parsedIngredient.group = currentGroup;
+        group.push(parsedIngredient);
+      }
+    }
+
+    if (group.length) parsedIngredients.push(group);
+  }
+
+  return parsedIngredients;
+};
+
 app.get('/parseRecipeOnCloud', async function (req, res, next) {
   var url = req.query.url
   console.log("Recipe URL Received is :" + url);
@@ -114,7 +145,7 @@ app.get('/parseRecipeOnCloud', async function (req, res, next) {
     .then(recipe => {
       console.log("\nRecipe Scraped, JSON is :%j", recipe);
       recipe.url = url;
-      const ingrParserResult = recipe.ingredients.map((v, i) => parse_ingredient(v, LANGUAGE));
+      const ingrParserResult = ingredient_parser
       let parsedIngredients = [];
       for (i = 0; i < ingrParserResult.length; i++) {
         const ingredient = ingrParserResult[i];
@@ -174,39 +205,11 @@ app.get('/parseRecipeOnCloud', async function (req, res, next) {
 
 app.get('/parseIngredients', (req, res) => {
   const { ingredients } = req.body;
-  let parsedIngredients = [];
-  let group = [];
-  let currentGroup = "";
-  if (Array.isArray(ingredients)) {
-    const hasGroup = ingredients.reduce((prev, curr) => prev || curr.match(groupRegex), false);
-    for (let i of ingredients) {
-      let parsedIngredient = parse_ingredient(cleanup(i), LANGUAGE);
 
-      if (!hasGroup) {
-        parsedIngredients.push(parsedIngredient);
-      }
-      else if (hasGroup && i.match(groupRegex)) {
-        currentGroup = i.match(groupRegex)[0].replace(":", "").trim();
-        if (group.length) {
-          parsedIngredients.push(group);
-          group = [];
-        }
-      }
-      else if (hasGroup) {
-        parsedIngredient.group = currentGroup;
-        group.push(parsedIngredient);
-      }
-    }
-
-    if (group.length) parsedIngredients.push(group);
-  }
+  const parsedIngredients = ingredient_parser(ingredients);
 
   res.send(parsedIngredients);
 });
-
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 function getFirstNumber(string) {
   // console.log("Getting Serving Size, string is :" + string);
