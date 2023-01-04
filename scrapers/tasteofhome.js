@@ -32,16 +32,16 @@ const tasteofhome = url => {
             Recipe.servings = servings.trim();
           }
 
-          let time = $(".total-time").text().split("+");
+          let time = $(".total-time").text();
 
-          let prepTime = time[0];
-          if (prepTime) {
-            Recipe.time.prep = prepTime.split(":")[2].trim();
+          if (time.match(/Prep: \d+ \w+/gi)) {
+            let prepTime = time.match(/Prep: \d+ \w+/gi);
+            Recipe.time.prep = prepTime[0].split(":")[1].trim();
           }
 
-          let cookTime = time[1];
-          if (cookTime) {
-            Recipe.time.cook = cookTime.split(":")[1].trim();
+          if (time.match(/Cook: \d+ \w+/gi)) {
+            let cookTime = time.match(/Cook: \d+ \w+/gi);
+            Recipe.time.cook = cookTime[0].split(":")[1].trim();
           }
 
           if (
