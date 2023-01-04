@@ -88,21 +88,14 @@ app.get("/parse", (req, res) => {
 const recipeScraper = url => {
   return new Promise((resolve, reject) => {
     let parse = parseDomain(url);
-    if (parse) {
-      let domain = parse.domain;
-      if (domains[domain] !== undefined) {
-        resolve(domains[domain](url));
-      } else {
-        domains["jsonLd"](url).then(recipe => resolve(recipe)).catch(e => {
-          console.log(e)
-          console.log("Failed to parse Recipe on the website :" + url);
-          reject(new Error("Recipe Site not yet supported"));
-        });
-      }
-    } else {
-      console.log("Failed to parse Recipe on the website :" + url);
-      reject(new Error("Failed to parse Recipe on the website"));
-    }
+    let domain = parse.domain;
+    domains[domain](url).then(recipe => resolve(recipe)).catch(e => {
+      domains["jsonLd"](url).then(recipe => resolve(recipe)).catch(e => {
+        console.log(e)
+        console.log("Failed to parse Recipe on the website :" + url);
+        reject(new Error("Recipe Site not yet supported"));
+      });
+    });
   });
 };
 

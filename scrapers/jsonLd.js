@@ -76,7 +76,7 @@ const jsonLd = url => {
     if (recipeJson.cookTime) Recipe.time.cook = clean(checkObject(recipeJson.cookTime, "maxValue"));
     if (recipeJson.totalTime) Recipe.time.total = clean(checkObject(recipeJson.totalTime, "maxValue"));
 
-    Recipe.ingredients = recipeJson.recipeIngredient.map(e => clean(e));
+    if (recipeJson.recipeIngredient) Recipe.ingredients = recipeJson.recipeIngredient.map(e => clean(e));
     if (recipeJson.recipeInstructions)
       if (Array.isArray(recipeJson.recipeInstructions))
         Recipe.instructions = recipeJson.recipeInstructions.map(e => e.text ? e.text : e.name);
