@@ -5,10 +5,15 @@ const RecipeSchema = require("../helpers/recipe-schema");
 const clean = s => {
   return s.toString()
     .replace("PT", "")
+    .replace("P0DT", "")
     .replace("H", " hours ")
-    .replace("M", " minutes")
+    .replace("M", " minutes ")
+    .replace("S", " seconds")
     .replace("))", ")")
     .replace("((", "(")
+    .replace("0 hours ", "")
+    .replace(" 0 minutes ", "")
+    .replace(" 0 seconds", "")
     .trim()
 }
 
