@@ -43,7 +43,7 @@ const domains = {
   foodnetwork: require("./scrapers/foodnetwork"),
   gimmesomeoven: require("./scrapers/gimmesomeoven"),
   kitchenstories: require("./scrapers/kitchenstories"),
-  maangchi: require("./scrapers/maangchi"),
+  //maangchi: require("./scrapers/maangchi"),
   minimalistbaker: require("./scrapers/minimalistbaker"),
   myrecipes: require("./scrapers/myrecipes"),
   nigella: require("./scrapers/nigella"),
@@ -60,7 +60,7 @@ const domains = {
   thewoksoflife: require("./scrapers/thewoksoflife"),
   vegrecipesofindia: require("./scrapers/vegrecipesofindia"),
   whatsgabycooking: require("./scrapers/whatsgabycooking"),
-  woolworths: require("./scrapers/woolworths"),
+  //woolworths: require("./scrapers/woolworths"),
   yummly: require("./scrapers/yummly"),
   thekitchn: require("./scrapers/thekitchn"),
   rachaelray: require("./scrapers/rachaelray"),
@@ -90,10 +90,14 @@ const recipeScraper = url => {
     let parse = parseDomain(url);
     let domain = parse.domain;
     try {
-      domains[domain](url).then(recipe => resolve(recipe));
-    } catch(e) {
-      domains["jsonLd"](url).then(recipe => resolve(recipe)).catch(e => {
-        console.log(e)
+      domains[domain](url).then(recipe => resolve(recipe)).catch(e => {
+        domains["jsonLd"](url).then(recipe => resolve(recipe)).catch(error => {
+          console.log("Failed to parse Recipe on the website :" + url);
+          reject(new Error("Recipe Site not yet supported"));
+        });
+      });
+    } catch (e) {
+      domains["jsonLd"](url).then(recipe => resolve(recipe)).catch(error => {
         console.log("Failed to parse Recipe on the website :" + url);
         reject(new Error("Recipe Site not yet supported"));
       });

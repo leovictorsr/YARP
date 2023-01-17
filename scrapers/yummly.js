@@ -36,15 +36,12 @@ const yummly = url => {
 
         Recipe.servings = $(".servings").text().toLowerCase();
 
-        console.log(Recipe)
-
         if (!Recipe.name || !Recipe.ingredients.length) {
           reject(new Error("No recipe found on page"));
         } else {
           resolve(Recipe);
         }
       } catch (error) {
-        console.log(error)
         reject(new Error("No recipe found on page"));
       }
     }
